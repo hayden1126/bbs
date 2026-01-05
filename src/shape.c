@@ -4,28 +4,27 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "insert.h"
-#include "utils.h"
+#include "shape.h"
 #include "coordinate.h"
 #include "grid.h"
 
 #define MAXWEIGHT 9
 
-static void inserterror(const char *msg) {
-    fprintf(stderr, "Insert Error: %s\n", msg);
+static void shapeerror(const char *msg) {
+    fprintf(stderr, "Shape Error: %s\n", msg);
 }
 
-struct InsertObject {
+struct Shape {
     int shape[MAXWEIGHT+1];
     size_t weight;
     size_t fwidth;
     size_t flength;
 };
 
-struct InsertObject* create_insert(int shape[]) {
-    struct InsertObject* obj = (struct InsertObject*)calloc(1, sizeof(struct InsertObject));
+struct Shape* create_shape(int shape[]) {
+    struct Shape* obj = (struct Shape*)calloc(1, sizeof(struct Shape));
     if (!obj) {
-        inserterror("Memory allocation failed");
+        shapeerror("Memory allocation failed");
         return NULL;
     }
 
@@ -35,18 +34,16 @@ struct InsertObject* create_insert(int shape[]) {
     int max_col = 0;
 
     // Iterate through each coordinate
-    int index = 0;
-    while (shape[index] > 0)
+    for (int i = 0; shape[i] > 0; i++)
     {
         obj->weight++;
-        int row = get_row(shape[index]);
-        int col = get_col(shape[index]);
+        int row = get_row(shape[i]);
+        int col = get_col(shape[i]);
 
         if (row < min_row) min_row = row;
         if (col < min_col) min_col = col;
         if (row > max_row) max_row = row;
         if (col > max_col) max_col = col;
-        index++;
     }
 
     obj->flength = max_row - min_row + 1;
@@ -66,16 +63,16 @@ struct InsertObject* create_insert(int shape[]) {
 int main(void) {
     //test create_insert
     int test_shape[] = {11, 13, 33, 22, 0};
-    struct InsertObject* insert_obj = create_insert(test_shape);
-    if (insert_obj) {
-        printf("Insert Object created successfully.\n");
-        printf("Weight: %zu\n", insert_obj->weight);
-        printf("Frame Width: %zu\n", insert_obj->fwidth);
-        printf("Frame Length: %zu\n", insert_obj->flength);
-        print_shape(insert_obj->shape);
-        free(insert_obj);
+    struct Shape* shape_obj = create_shape(test_shape);
+    if (shape_obj) {
+        printf("Shape Object created successfully.\n");
+        printf("Weight: %zu\n", shape_obj->weight);
+        printf("Frame Width: %zu\n", shape_obj->fwidth);
+        printf("Frame Length: %zu\n", shape_obj->flength);
+        preview(shape_obj->shape);
+        free(shape_obj);
     } else {
-        printf("Failed to create Insert Object.\n");
+        printf("Failed to create Shape Object.\n");
     }
     return 0;
 }
