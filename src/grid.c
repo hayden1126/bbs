@@ -1,9 +1,63 @@
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "grid.h"
+#include "shape.h"
 #include "coordinate.h"
 
-void print_shape(int shape[]) { // creates a grid representation of the shape
+#define GRID_ROWS 8
+#define GRID_COLS 8
+
+static void griderror(const char *msg) {
+    fprintf(stderr, "Grid Error: %s\n", msg);
+}
+
+struct Grid {
+    int shape[GRID_COLS * GRID_ROWS + 1];
+    size_t weight;
+};
+
+struct Grid *create_grid() {
+    struct Grid *grid = (struct Grid *)calloc(1, sizeof(struct Grid));
+    if (!grid) {
+        griderror("Memory allocation failed");
+        return NULL;
+    }
+    return grid;
+}
+
+void insert_shape(struct Grid *grid, struct Shape *shape_obj) { // inserts a shape into the grid assuming it fits
+    if (!grid) {
+        griderror("Grid is NULL");
+        return;
+    }
+
+    // Insert the shape into the grid
+    for (size_t i = 0; i < shape_obj->weight; i++) {
+        grid->shape[i] = shape_obj->shape[i];
+    }
+    grid->shape[shape_obj->weight] = 0; // Null-terminate
+    grid->weight += shape_obj->weight;
+}
+
+int collision_check(struct Grid *grid, struct Shape *shape_obj) { // checks if a shape collides with existing shapes in the grid
+    if (!grid) {
+        griderror("Grid is NULL");
+        return 1; // Indicate collision due to error
+    }
+
+    for (size_t i = 0; i < shape_obj->weight; i++) {
+        int shape_coord = shape_obj->shape[i];
+        for (size_t j = 0; j < grid->weight; j++) {
+            if (shape_coord == grid->shape[j]) {
+                return 1; // Collision detected
+            }
+        }
+    }
+    return 0; // No collision
+}
+
+void preview(int shape[]) { // creates a grid representation of the shape
     int max_row = 0;
     int max_col = 0;
 

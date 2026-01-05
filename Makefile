@@ -1,11 +1,11 @@
-# Makefile for building and testing insert.c
+# Makefile for building and testing shape.c
 
 CC := gcc
 CFLAGS := -std=c11 -Wall -Wextra -Wpedantic -Iinclude -g
 SRCDIR := src
 BINDIR := bin
-TARGET := $(BINDIR)/insert_test
-SRCS := $(SRCDIR)/insert.c $(SRCDIR)/coordinate.c $(SRCDIR)/grid.c $(SRCDIR)/utils.c
+TARGET := $(BINDIR)/shape_test
+SRCS := $(SRCDIR)/shape.c $(SRCDIR)/coordinate.c $(SRCDIR)/grid.c
 OBJS := $(SRCS:.c=.o)
 
 .PHONY: all test check run clean
@@ -18,18 +18,18 @@ $(BINDIR):
 $(SRCDIR)/%.o: $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(TARGET): $(SRCDIR)/insert.o $(SRCDIR)/coordinate.o $(SRCDIR)/grid.o $(SRCDIR)/utils.o | $(BINDIR)
+$(TARGET): $(SRCDIR)/shape.o $(SRCDIR)/coordinate.o $(SRCDIR)/grid.o | $(BINDIR)
 	$(CC) $(CFLAGS) -o $@ $^
 
 # Run the test binary (prints output to stdout)
 test: $(TARGET)
-	@echo "Running insert test..."
+	@echo "Running shape test..."
 	@$(TARGET)
 
 # Run test and verify expected output
 check: $(TARGET)
-	@echo "Verifying insert test output..."
-	@$(TARGET) | grep -q "Insert Object created successfully." && echo "PASS" || (echo "FAIL"; exit 1)
+	@echo "Verifying shape test output..."
+	@$(TARGET) | grep -q "Shape Object created successfully." && echo "PASS" || (echo "FAIL"; exit 1)
 
 run: test
 
