@@ -8,24 +8,30 @@
 #include "coordinate.h"
 #include "grid.h"
 
-#define MAXWEIGHT 9
+#define MAXWEIGHT 8*8
 
 static void shapeerror(const char *msg) {
     fprintf(stderr, "Shape Error: %s\n", msg);
 }
 
-struct Shape {
-    int shape[MAXWEIGHT+1];
-    size_t weight;
-    size_t fwidth;
-    size_t flength;
-};
-
-struct Shape* create_shape(int shape[]) {
-    struct Shape* obj = (struct Shape*)calloc(1, sizeof(struct Shape));
+struct Shape* create_shape(int coords[]) {
+    struct Shape *obj = malloc(sizeof(struct Shape));
     if (!obj) {
         shapeerror("Memory allocation failed");
         return NULL;
+    }
+    obj->weight = 0;
+    obj->fwidth = 0;
+    obj->flength = 0;
+
+    // Initialize coords array to -1
+    for (int i = 0; i <= MAXWEIGHT; i++) { 
+        obj->coords[i] = -1;
+    }
+
+    // Check for empty input
+    if (coords[0] == -1) {
+        return obj;
     }
 
     int min_row = MAXWEIGHT;
@@ -33,12 +39,18 @@ struct Shape* create_shape(int shape[]) {
     int max_row = 0;
     int max_col = 0;
 
+
     // Iterate through each coordinate
-    for (int i = 0; shape[i] > 0; i++)
-    {
+    for (int i = 0; coords[i] >= 0; i++) {
+        if (obj->weight >= MAXWEIGHT) {
+            shapeerror("Too many coordinates");
+            free(obj);
+            return NULL;
+        }
+
         obj->weight++;
-        int row = get_row(shape[i]);
-        int col = get_col(shape[i]);
+        int row = get_row(coords[i]);
+        int col = get_col(coords[i]);
 
         if (row < min_row) min_row = row;
         if (col < min_col) min_col = col;
@@ -49,30 +61,19 @@ struct Shape* create_shape(int shape[]) {
     obj->flength = max_row - min_row + 1;
     obj->fwidth = max_col - min_col + 1;
 
-    // Parse shape into normalized form (1-indexed)
+    // Parse coords into normalized form (0-indexed)
     for (size_t i = 0; i < obj->weight; i++) {
-        int row = get_row(shape[i]) - min_row + 1;
-        int col = get_col(shape[i]) - min_col + 1;
-        obj->shape[i] = make_coord(row, col);
+        int row = get_row(coords[i]) - min_row;
+        int col = get_col(coords[i]) - min_col;
+        obj->coords[i] = make_coord(row, col);
     }
-    obj->shape[obj->weight] = 0; // Null-terminate
-
+    obj->coords[obj->weight] = -1; // Null-terminate
+    
     return obj;
 }
 
-int main(void) {
-    //test create_insert
-    int test_shape[] = {11, 13, 33, 22, 0};
-    struct Shape* shape_obj = create_shape(test_shape);
+void free_shape(struct Shape* shape_obj) {
     if (shape_obj) {
-        printf("Shape Object created successfully.\n");
-        printf("Weight: %zu\n", shape_obj->weight);
-        printf("Frame Width: %zu\n", shape_obj->fwidth);
-        printf("Frame Length: %zu\n", shape_obj->flength);
-        preview(shape_obj->shape);
         free(shape_obj);
-    } else {
-        printf("Failed to create Shape Object.\n");
     }
-    return 0;
 }

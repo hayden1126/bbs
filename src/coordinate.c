@@ -1,10 +1,11 @@
 #include <stdlib.h>
 #include "coordinate.h"
+#include <stdio.h>
 
 /*
 coordinates are stored as integers where the tens place is the column and the units place is the row.
-They are One indexed.
-For example, coordinate 23 represents column 1, row 2.
+They are zero-indexed.
+For example, coordinate 23 represents row 3, column 2.
 */
 
 int get_row(int coord) {

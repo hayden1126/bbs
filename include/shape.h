@@ -1,15 +1,18 @@
 #ifndef SHAPE_H
 #define SHAPE_H
-#define MAXWEIGHT 9
+
+#include <stddef.h>
+
+#define MAXWEIGHT 8*8
 
 struct Shape {
-    int shape[MAXWEIGHT+1];
+    int coords[MAXWEIGHT+1];
     size_t weight;
     size_t fwidth;
     size_t flength;
 };
 
-
-struct Shape* create_shape(int shape[]);
+struct Shape* create_shape(int coords[]);
+void free_shape(struct Shape* shape_obj);
 
 #endif // SHAPE_H
