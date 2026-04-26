@@ -1,37 +1,31 @@
-# Makefile for building and testing shape.c
-
 CC := gcc
-CFLAGS := -std=c11 -Wall -Wextra -Wpedantic -Iinclude -g
-SRCDIR := src
-BINDIR := bin
-TARGET := $(BINDIR)/shape_test
-SRCS := $(SRCDIR)/shape.c $(SRCDIR)/coordinate.c $(SRCDIR)/grid.c
-OBJS := $(SRCS:.c=.o)
+CFLAGS := -std=c11 -Wall -Wextra -Wpedantic -Iinclude -O2 -g
+CORE := src/bbs.o
+CLI := bin/bbs
+TEST := bin/bbs_test
 
-.PHONY: all test check run clean
+.PHONY: all test check clean
 
-all: $(TARGET)
+all: $(CLI) $(TEST)
 
-$(BINDIR):
-	mkdir -p $(BINDIR)
+bin:
+	mkdir -p bin
 
-$(SRCDIR)/%.o: $(SRCDIR)/%.c
+src/%.o: src/%.c include/bbs.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(TARGET): $(SRCDIR)/shape.o $(SRCDIR)/coordinate.o $(SRCDIR)/grid.o | $(BINDIR)
+$(CLI): src/cli.o $(CORE) | bin
 	$(CC) $(CFLAGS) -o $@ $^
 
-# Run the test binary (prints output to stdout)
-test: $(TARGET)
-	@echo "Running shape test..."
-	@$(TARGET)
+$(TEST): src/tests.o $(CORE) | bin
+	$(CC) $(CFLAGS) -o $@ $^
 
-# Run test and verify expected output
-check: $(TARGET)
-	@echo "Verifying shape test output..."
-	@$(TARGET) | grep -q "Shape Object created successfully." && echo "PASS" || (echo "FAIL"; exit 1)
+test: $(TEST)
+	@$(TEST)
 
-run: test
+check: $(TEST)
+	@$(TEST) | grep -q "All tests passed." && echo PASS || (echo FAIL; exit 1)
 
 clean:
-	rm -f $(SRCDIR)/*.o $(TARGET)
+	rm -f src/*.o $(CLI) $(TEST)
+	rmdir bin 2>/dev/null || true
